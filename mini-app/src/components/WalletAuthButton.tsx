@@ -23,12 +23,25 @@ export function WalletAuthButton ({ onSignInComplete }: WalletAuthButtonProps) {
       if (!convexUrl) {
         throw new Error('VITE_CONVEX_URL is not defined')
       }
-      const httpActionUrl = convexUrl.replace('.cloud', '.site')
+
+      // For self-hosted Convex, the HTTP action URL is often different from the main URL
+      // and does not follow the .cloud -> .site convention.
+      // It's recommended to set this explicitly in your environment variables.
+      const httpActionUrl =
+        import.meta.env.VITE_CONVEX_HTTP_URL ??
+        convexUrl.replace('.cloud', '.site')
+
+      if (!import.meta.env.VITE_CONVEX_HTTP_URL) {
+        console.warn(
+          'VITE_CONVEX_HTTP_URL is not set. Falling back to replacing ".cloud" with ".site" for the HTTP action URL. This may not work for self-hosted deployments. Please set VITE_CONVEX_HTTP_URL to your backend\'s site origin (e.g., "https://<your-backend-url>/http").'
+        )
+      }
 
       const getNonceUrl = new URL(`${httpActionUrl}/getNonce`)
       const completeSiweUrl = new URL(`${httpActionUrl}/completesiwe`)
 
       const res = await fetch(getNonceUrl)
+
       if (!res.ok) {
         console.error('Failed to fetch nonce:', res.status, await res.text())
         return
