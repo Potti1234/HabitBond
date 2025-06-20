@@ -15,6 +15,7 @@ import { Route as ProfileImport } from './routes/profile'
 import { Route as NotFoundImport } from './routes/not-found'
 import { Route as LoginImport } from './routes/login'
 import { Route as ErrorImport } from './routes/error'
+import { Route as AddImport } from './routes/add'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -43,6 +44,12 @@ const ErrorRoute = ErrorImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AddRoute = AddImport.update({
+  id: '/add',
+  path: '/add',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
@@ -58,6 +65,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/add': {
+      id: '/add'
+      path: '/add'
+      fullPath: '/add'
+      preLoaderRoute: typeof AddImport
       parentRoute: typeof rootRoute
     }
     '/error': {
@@ -95,6 +109,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/add': typeof AddRoute
   '/error': typeof ErrorRoute
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
@@ -103,6 +118,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/add': typeof AddRoute
   '/error': typeof ErrorRoute
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
@@ -112,6 +128,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/add': typeof AddRoute
   '/error': typeof ErrorRoute
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
@@ -120,15 +137,23 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/error' | '/login' | '/not-found' | '/profile'
+  fullPaths: '/' | '/add' | '/error' | '/login' | '/not-found' | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/error' | '/login' | '/not-found' | '/profile'
-  id: '__root__' | '/' | '/error' | '/login' | '/not-found' | '/profile'
+  to: '/' | '/add' | '/error' | '/login' | '/not-found' | '/profile'
+  id:
+    | '__root__'
+    | '/'
+    | '/add'
+    | '/error'
+    | '/login'
+    | '/not-found'
+    | '/profile'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AddRoute: typeof AddRoute
   ErrorRoute: typeof ErrorRoute
   LoginRoute: typeof LoginRoute
   NotFoundRoute: typeof NotFoundRoute
@@ -137,6 +162,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AddRoute: AddRoute,
   ErrorRoute: ErrorRoute,
   LoginRoute: LoginRoute,
   NotFoundRoute: NotFoundRoute,
@@ -154,6 +180,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/add",
         "/error",
         "/login",
         "/not-found",
@@ -162,6 +189,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/add": {
+      "filePath": "add.tsx"
     },
     "/error": {
       "filePath": "error.tsx"
