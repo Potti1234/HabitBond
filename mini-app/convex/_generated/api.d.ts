@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as crons from "../crons.js";
+import type * as entity_habit from "../entity/habit.js";
 import type * as http from "../http.js";
 import type * as login from "../login.js";
 import type * as siwe from "../siwe.js";
@@ -30,6 +31,7 @@ import type * as worldcoin from "../worldcoin.js";
  */
 declare const fullApi: ApiFromModules<{
   crons: typeof crons;
+  "entity/habit": typeof entity_habit;
   http: typeof http;
   login: typeof login;
   siwe: typeof siwe;

@@ -32,5 +32,19 @@ export default defineSchema({
       v.literal('failed')
     ),
     transactionId: v.optional(v.string())
-  }).index('by_reference', ['reference'])
+  }).index('by_reference', ['reference']),
+  habits: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    emoji: v.string(),
+    color: v.string(),
+  }).index("by_userId", ["userId"]),
+  habitCompletions: defineTable({
+    habitId: v.id("habits"),
+    userId: v.id("users"),
+    date: v.string(), // "YYYY-MM-DD"
+  })
+    .index("by_user", ["userId"])
+    .index("by_habit_and_date", ["habitId", "date"]),
 });
