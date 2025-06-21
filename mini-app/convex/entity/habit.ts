@@ -28,6 +28,62 @@ export const createHabit = mutation({
     },
 });
 
+export const updateHabit = mutation({
+    args: {
+        id: v.id("habits"),
+        sessionId: v.string(),
+        name: v.string(),
+        description: v.optional(v.string()),
+        emoji: v.string(),
+        color: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const user = await getAuthenticatedUser(ctx, args.sessionId);
+
+        if (!user) {
+            throw new ConvexError("User not authenticated");
+        }
+
+        const habit = await ctx.db.get(args.id);
+
+        if (!habit) {
+            throw new ConvexError("Habit not found");
+        }
+
+        if (habit.userId !== user._id) {
+            throw new ConvexError("User does not have permission to update this habit");
+        }
+
+        await ctx.db.patch(args.id, {
+            name: args.name,
+            description: args.description,
+            emoji: args.emoji,
+            color: args.color,
+        });
+    },
+});
+
+export const getHabit = query({
+    args: {
+        sessionId: v.string(),
+        habitId: v.id("habits"),
+    },
+    handler: async (ctx, args) => {
+        const user = await getAuthenticatedUser(ctx, args.sessionId);
+        if (!user) {
+            return null;
+        }
+
+        const habit = await ctx.db.get(args.habitId);
+
+        if (!habit || habit.userId !== user._id) {
+            return null;
+        }
+
+        return habit;
+    },
+});
+
 export const getHabits = query({
     args: { sessionId: v.string() },
     handler: async (ctx, args) => {

@@ -1,75 +1,27 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useSession } from '@/hooks/useSession'
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
-import { Id } from '../../convex/_generated/dataModel'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { format, subDays, startOfYear, getDay } from 'date-fns'
+import { format } from 'date-fns'
+import { HabitDetailDrawer } from '@/components/HabitDetailDrawer'
+import { Habit } from '@/types/habit'
+import { HabitCalendar } from '@/components/HabitCalendar'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent
 })
 
-const HabitCalendar = ({
-  completions,
-  color
-}: {
-  completions: string[]
-  color: string
-}) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const today = new Date()
-  const yearStart = startOfYear(today)
-  const days = Array.from({ length: 365 }, (_, i) => subDays(today, 364 - i))
-  const dayOffset = getDay(yearStart) === 0 ? 6 : getDay(yearStart) - 1
-
-  const completionSet = new Set(completions)
-
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollLeft =
-        scrollContainerRef.current.scrollWidth
-    }
-  }, [])
-
-  return (
-    <div className='overflow-x-auto pb-2' ref={scrollContainerRef}>
-      <div className='inline-grid grid-flow-col auto-cols-max grid-rows-7 gap-1'>
-        {Array.from({ length: dayOffset }).map((_, i) => (
-          <div key={`offset-${i}`} />
-        ))}
-        {days.map(day => {
-          const dateString = format(day, 'yyyy-MM-dd')
-          const isCompleted = completionSet.has(dateString)
-          return (
-            <div
-              key={dateString}
-              className='w-4 h-4 rounded-sm'
-              style={{ backgroundColor: isCompleted ? color : '#ebedf0' }}
-              title={dateString}
-            />
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 function HabitCard ({
-  habit
+  habit,
+  onHabitClick
 }: {
-  habit: {
-    _id: Id<'habits'>
-    name: string
-    description?: string
-    emoji: string
-    color: string
-    completions: string[]
-  }
+  habit: Habit
+  onHabitClick: (habit: Habit) => void
 }) {
   const { sessionId } = useSession()
   const toggleCompletion = useMutation(
@@ -105,7 +57,8 @@ function HabitCard ({
   const todayString = format(new Date(), 'yyyy-MM-dd')
   const isCompletedToday = habit.completions.includes(todayString)
 
-  const handleToggle = async () => {
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (!sessionId) {
       toast.error('Not logged in')
       return
@@ -123,7 +76,7 @@ function HabitCard ({
   }
 
   return (
-    <Card>
+    <Card onClick={() => onHabitClick(habit)} className='cursor-pointer'>
       <CardHeader>
         <div className='flex items-start justify-between'>
           <div className='flex items-start gap-4'>
@@ -157,6 +110,7 @@ function HabitCard ({
 function RouteComponent () {
   const { isLoading: isSessionLoading, user, sessionId } = useSession()
   const navigate = useNavigate()
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
 
   const habits = useQuery(
     api.entity.habit.getHabits,
@@ -190,11 +144,20 @@ function RouteComponent () {
         </div>
       ) : (
         <div className='space-y-4'>
-          {habits.map(habit => (
-            <HabitCard key={habit._id} habit={habit} />
+          {(habits as Habit[]).map(habit => (
+            <HabitCard
+              key={habit._id}
+              habit={habit}
+              onHabitClick={setSelectedHabit}
+            />
           ))}
         </div>
       )}
+      <HabitDetailDrawer
+        habit={selectedHabit}
+        isOpen={!!selectedHabit}
+        onClose={() => setSelectedHabit(null)}
+      />
     </div>
   )
 }

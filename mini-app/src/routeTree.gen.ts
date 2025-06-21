@@ -17,6 +17,7 @@ import { Route as LoginImport } from './routes/login'
 import { Route as ErrorImport } from './routes/error'
 import { Route as AddImport } from './routes/add'
 import { Route as IndexImport } from './routes/index'
+import { Route as HabitHabitIdEditImport } from './routes/habit.$habitId.edit'
 
 // Create/Update Routes
 
@@ -53,6 +54,12 @@ const AddRoute = AddImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const HabitHabitIdEditRoute = HabitHabitIdEditImport.update({
+  id: '/habit/$habitId/edit',
+  path: '/habit/$habitId/edit',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -102,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileImport
       parentRoute: typeof rootRoute
     }
+    '/habit/$habitId/edit': {
+      id: '/habit/$habitId/edit'
+      path: '/habit/$habitId/edit'
+      fullPath: '/habit/$habitId/edit'
+      preLoaderRoute: typeof HabitHabitIdEditImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -114,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
+  '/habit/$habitId/edit': typeof HabitHabitIdEditRoute
 }
 
 export interface FileRoutesByTo {
@@ -123,6 +138,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
+  '/habit/$habitId/edit': typeof HabitHabitIdEditRoute
 }
 
 export interface FileRoutesById {
@@ -133,13 +149,28 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
+  '/habit/$habitId/edit': typeof HabitHabitIdEditRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add' | '/error' | '/login' | '/not-found' | '/profile'
+  fullPaths:
+    | '/'
+    | '/add'
+    | '/error'
+    | '/login'
+    | '/not-found'
+    | '/profile'
+    | '/habit/$habitId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/add' | '/error' | '/login' | '/not-found' | '/profile'
+  to:
+    | '/'
+    | '/add'
+    | '/error'
+    | '/login'
+    | '/not-found'
+    | '/profile'
+    | '/habit/$habitId/edit'
   id:
     | '__root__'
     | '/'
@@ -148,6 +179,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/not-found'
     | '/profile'
+    | '/habit/$habitId/edit'
   fileRoutesById: FileRoutesById
 }
 
@@ -158,6 +190,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   NotFoundRoute: typeof NotFoundRoute
   ProfileRoute: typeof ProfileRoute
+  HabitHabitIdEditRoute: typeof HabitHabitIdEditRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -167,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   NotFoundRoute: NotFoundRoute,
   ProfileRoute: ProfileRoute,
+  HabitHabitIdEditRoute: HabitHabitIdEditRoute,
 }
 
 export const routeTree = rootRoute
@@ -184,7 +218,8 @@ export const routeTree = rootRoute
         "/error",
         "/login",
         "/not-found",
-        "/profile"
+        "/profile",
+        "/habit/$habitId/edit"
       ]
     },
     "/": {
@@ -204,6 +239,9 @@ export const routeTree = rootRoute
     },
     "/profile": {
       "filePath": "profile.tsx"
+    },
+    "/habit/$habitId/edit": {
+      "filePath": "habit.$habitId.edit.tsx"
     }
   }
 }
