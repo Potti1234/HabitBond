@@ -47,4 +47,13 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_habit_and_date", ["habitId", "date"]),
+  streakGoals: defineTable({
+    habitId: v.id("habits"),
+    userId: v.id("users"),
+    days: v.number(),
+    stakeAmount: v.number(),
+    status: v.union(v.literal("active"), v.literal("completed"), v.literal("failed")),
+  })
+    .index("by_habit", ["habitId"])
+    .index("by_user", ["userId"]),
 });

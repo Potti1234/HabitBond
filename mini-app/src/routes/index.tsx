@@ -5,12 +5,51 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckIcon } from 'lucide-react'
+import { CheckIcon, FlameIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { HabitDetailDrawer } from '@/components/HabitDetailDrawer'
 import { Habit } from '@/types/habit'
 import { HabitCalendar } from '@/components/HabitCalendar'
+
+function calculateStreak (completions: string[]): number {
+  const completionSet = new Set(completions)
+  if (completionSet.size === 0) {
+    return 0
+  }
+
+  let checkDate = new Date()
+  checkDate.setUTCHours(0, 0, 0, 0)
+
+  const todayStr = checkDate.toISOString().slice(0, 10)
+
+  let yesterday = new Date()
+  yesterday.setUTCDate(checkDate.getUTCDate() - 1)
+  yesterday.setUTCHours(0, 0, 0, 0)
+  const yesterdayStr = yesterday.toISOString().slice(0, 10)
+
+  if (!completionSet.has(todayStr) && !completionSet.has(yesterdayStr)) {
+    return 0
+  }
+
+  let currentStreak = 0
+
+  if (!completionSet.has(todayStr)) {
+    checkDate.setUTCDate(checkDate.getUTCDate() - 1)
+  }
+
+  while (true) {
+    const dateStr = checkDate.toISOString().slice(0, 10)
+    if (completionSet.has(dateStr)) {
+      currentStreak++
+      checkDate.setUTCDate(checkDate.getUTCDate() - 1)
+    } else {
+      break
+    }
+  }
+
+  return currentStreak
+}
 
 export const Route = createFileRoute('/')({
   component: RouteComponent
@@ -42,7 +81,9 @@ function HabitCard ({
           } else {
             completions.add(args.date)
           }
-          return { ...h, completions: Array.from(completions) }
+          const newCompletions = Array.from(completions)
+          const newStreak = calculateStreak(newCompletions)
+          return { ...h, completions: newCompletions, streak: newStreak }
         }
         return h
       })
@@ -86,18 +127,30 @@ function HabitCard ({
               <p className='text-muted-foreground'>{habit.description}</p>
             </div>
           </div>
-          <Button
-            size='icon'
-            variant={isCompletedToday ? 'default' : 'outline'}
-            onClick={handleToggle}
-            style={
-              isCompletedToday
-                ? { backgroundColor: habit.color, color: 'white' }
-                : {}
-            }
-          >
-            <CheckIcon />
-          </Button>
+          <div className='flex items-center gap-2'>
+            {habit.streak > 0 && (
+              <div className='flex items-center gap-1 text-muted-foreground'>
+                <FlameIcon
+                  className={`h-5 w-5 ${
+                    isCompletedToday ? 'text-red-500' : ''
+                  }`}
+                />
+                <span className='font-bold'>{habit.streak}</span>
+              </div>
+            )}
+            <Button
+              size='icon'
+              variant={isCompletedToday ? 'default' : 'outline'}
+              onClick={handleToggle}
+              style={
+                isCompletedToday
+                  ? { backgroundColor: habit.color, color: 'white' }
+                  : {}
+              }
+            >
+              <CheckIcon />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
